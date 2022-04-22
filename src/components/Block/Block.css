@@ -1,0 +1,19 @@
+.block-circle, .block-rectangle, .block-triangle {
+    position: absolute;
+    transform: translate(-50%, -100%);
+    text-align: center;
+  }
+  .block-circle {
+    background-color: #29b6f6;
+    border-radius: 50%;
+  }
+  .block-triangle {
+    width: 0;
+    height: 0;
+    line-height: 4rem;
+    border-style: solid;
+    border-color: transparent transparent #ffca28 transparent
+  }
+  .block-rectangle {
+    background-color: #ef5350;
+  }
