@@ -5,22 +5,32 @@ import {
   addRightSideBlock,
   addLeftSideBlock,
   addFallingBlock,
-  initializeFallingBlock,
   resetState,
+  initializeFallingBlock,
+  setGameOverStatus,
 } from "../../store/actions/tetterTotterActions";
-import { TEETER_TOTTER_WIDTH } from "../../utils/constants";
+import {
+  MAX_BENDING,
+  MAX_SIDES_DIFFERENCE,
+  MIN_BENDING,
+  TEETER_TOTTER_WIDTH,
+} from "../../utils/constants";
+import { fillBlocks } from "../../utils/helpers";
 
 function FallingBlock(props, ref) {
   const { block, index, timeOut } = props;
   const blockRef = useRef(ref);
   const dispatch = useDispatch();
-  const isPaused = useSelector(
-    (storeState) => storeState.tetterTotter.isPaused,
-  );
-  const { leftSideBlocks, rightSideBlocks, gameOverStatus, swingBending } =
-    useSelector((storeState) => storeState.tetterTotter);
+  const {
+    leftSideBlocks,
+    rightSideBlocks,
+    swingBending,
+    isPaused,
+    leftSum,
+    rightSum,
+    gameOverStatus,
+  } = useSelector((storeState) => storeState.tetterTotter);
   const [blockDropboxTop, setBlockDropboxTop] = useState(block.height);
-  const [blockWindowBottom, setBlockWindowBottom] = useState(0);
   let timer = 0;
   function getSwingCoords() {
     const { top, bottom } = document
@@ -42,36 +52,47 @@ function FallingBlock(props, ref) {
   function incrementBlockDropboxTop() {
     setBlockDropboxTop(blockDropboxTop + 20);
   }
+  function getGameOverStatus() {
+    return (
+      swingBending > MAX_BENDING ||
+      swingBending < MIN_BENDING ||
+      Math.abs(leftSum - rightSum) > MAX_SIDES_DIFFERENCE
+    );
+  }
+  if (gameOverStatus) {
+    alert("Game Over");
+    dispatch(resetState());
+    dispatch(addRightSideBlock());
+    // eslint-disable-next-line no-shadow
+    const block = fillBlocks();
+    dispatch(initializeFallingBlock(block));
+  }
   function finishFalling() {
-    console.log("finish falling calisti");
     dispatch(addLeftSideBlock());
     dispatch(addFallingBlock());
     if (leftSideBlocks.length !== rightSideBlocks.length) {
-      console.log("lengthler esit degil");
       dispatch(addRightSideBlock());
     }
-    if (gameOverStatus) {
-      setTimeout(() => {
-        alert("game finished");
-        dispatch(resetState());
-        dispatch(addRightSideBlock());
-        dispatch(initializeFallingBlock());
-      });
+    if (getGameOverStatus()) {
+      dispatch(setGameOverStatus());
     }
   }
   useEffect(() => {
     if (isPaused) return clearTimeout(timer);
-    if (index !== 0) return;
+    if (index !== 0) return null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     timer = setTimeout(() => {
-      if (blockDropboxTop >= blockFinalPosition() - 20) {
-        console.log("finished");
+      if (blockDropboxTop >= blockFinalPosition() - 90) {
+        setBlockDropboxTop(0);
         finishFalling();
         clearTimeout(timer);
-        return;
+        return null;
       }
       incrementBlockDropboxTop();
-      return;
+      // eslint-disable-next-line no-useless-return
+      return null;
     }, timeOut);
+    return () => {};
   });
   return (
     <div ref={blockRef}>

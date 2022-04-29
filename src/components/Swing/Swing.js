@@ -1,39 +1,45 @@
 import { useSelector, useDispatch } from "react-redux";
 import Block from "../Block";
-import { addRightSideBlock } from "../../store/actions/tetterTotterActions";
+import { setSwingBending } from "../../store/actions/tetterTotterActions";
 import { MAX_BENDING } from "../../utils/constants";
-import { calculateSum } from "../../utils/helpers";
 import "./Swing.css";
 
 function Swing() {
-  const dispatch = useDispatch();
   const rightSideBlocks = useSelector(
     (state) => state.tetterTotter.rightSideBlocks,
   );
+  const dispatch = useDispatch();
   const leftSideBlocks = useSelector(
     (state) => state.tetterTotter.leftSideBlocks,
   );
-  dispatch(addRightSideBlock());
+  function getBlockPower(array) {
+    let sum = 0;
+    for (let i = 0; i < array.length; i += 1) {
+      sum += array[i].weight * array[i].offset;
+    }
+    return sum;
+  }
+  function calculateSum(blocks) {
+    return getBlockPower(blocks);
+  }
+  const leftSum = calculateSum(leftSideBlocks);
+  const rightSum = calculateSum(rightSideBlocks);
   function calculateSwing() {
-    if (!calculateSum(leftSideBlocks)) return MAX_BENDING;
-    if (calculateSum(leftSideBlocks) === calculateSum(rightSideBlocks)) {
+    if (!leftSum) return MAX_BENDING;
+    if (leftSum === rightSum) {
       return 0;
     }
-    return calculateSum(leftSideBlocks) > calculateSum(rightSideBlocks)
-      ? ((calculateSum(leftSideBlocks) - calculateSum(rightSideBlocks)) /
-          calculateSum(leftSideBlocks)) *
-          -100
-      : ((calculateSum(rightSideBlocks) - calculateSum(leftSideBlocks)) /
-          calculateSum(rightSideBlocks)) *
-          100;
+    return leftSum > rightSum
+      ? ((leftSum - rightSum) / leftSum) * -100
+      : ((rightSum - leftSum) / rightSum) * 100;
   }
   const swingBending = calculateSwing();
   function inlineStyleSwing() {
-    console.log(swingBending);
     return {
       transform: `rotate(${swingBending / 2}deg)`,
     };
   }
+  dispatch(setSwingBending(swingBending, leftSum, rightSum));
   return (
     <div className="swing" style={inlineStyleSwing()}>
       {rightSideBlocks.map((block) => (

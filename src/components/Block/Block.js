@@ -11,45 +11,37 @@ function Block(props, ref) {
     const { offset, type, height } = props.block;
     const topOffset = top || 0;
     const leftOffset = side ? 50 + offset * 10 : 50 - offset * 10;
-    const blockHeight =
-      type !== 1
-        ? {
-            height: `${roundUp(height)}px`,
-            width: `${roundUp(height)}px`,
-            lineHeight: `${roundUp(height)}px`,
-          }
-        : {
-            borderWidth: `0 ${roundUp(height)}px ${roundUp(height)}px ${roundUp(
-              height / 2,
-            )}px`,
-            lineHeight: `${roundUp(height * 1.2)}px`,
-          };
+    const blockHeight = type !== 1
+      ? {
+        height: `${roundUp(height)}px`,
+        width: `${roundUp(height)}px`,
+        lineHeight: `${roundUp(height)}px`,
+      }
+      : {
+        borderWidth: `0 ${roundUp(height)}px ${roundUp(height)}px ${roundUp(
+          height / 2,
+        )}px`,
+        lineHeight: `${roundUp(height * 1.2)}px`,
+      };
     return {
       top: `${topOffset}px`,
       left: `${leftOffset}%`,
       ...blockHeight,
     };
   }
-
   function renderBlock() {
     const { type } = props.block;
     switch (type) {
       case 0:
-        return "block-circle";
+        return 'block-circle';
       case 1:
-        return "block-triangle";
+        return 'block-triangle';
       case 2:
-        return "block-rectangle";
+        return 'block-rectangle';
       default:
-        return "block-circle";
+        return 'block-circle';
     }
   }
-
-  // function getBlockBottomCoords() {
-  //   const domElement = React.forwardRef('element');
-  //   return domElement.getBoundingClientRect().bottom;
-  // }
-
   return (
     <div className={renderBlock()} style={blockInlineStyle()} ref={blockRef}>
       {block.weight}
